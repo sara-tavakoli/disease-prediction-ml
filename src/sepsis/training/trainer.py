@@ -14,6 +14,7 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import math
+import os
 import time
 from pathlib import Path
 
@@ -120,7 +121,7 @@ class SequenceTrainer:
         )
         scaler = torch.cuda.amp.GradScaler(enabled=cfg.train.amp and self.device.type == "cuda")
 
-        run = _mlflow_start(cfg)
+        mlrun = _MlflowRun(cfg)
         history: list[dict[str, float]] = []
         best_metric = -math.inf
         best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
@@ -161,7 +162,7 @@ class SequenceTrainer:
                 "seconds": round(time.time() - t0, 1),
             }
             history.append(row)
-            _mlflow_log(run, row, step=epoch)
+            mlrun.log_metrics(row, step=epoch)
             log.info(
                 "epoch %02d | loss %.4f | val AUROC %.4f | val AUPRC %.4f | %.1fs",
                 epoch,
@@ -184,7 +185,7 @@ class SequenceTrainer:
                     break
 
         model.load_state_dict(best_state)
-        _mlflow_end(run, {"best_val_metric": best_metric, "best_epoch": best_epoch})
+        mlrun.end({"best_val_metric": best_metric, "best_epoch": best_epoch})
         return TrainOutput(
             model=model,
             history=history,
@@ -242,50 +243,47 @@ def predict_sequence_scores(
 # --------------------------------------------------------------------------- #
 # MLflow: optional, never fatal
 # --------------------------------------------------------------------------- #
-def _mlflow_start(cfg: ExperimentConfig):
-    try:
-        import os
+class _MlflowRun:
+    """Best-effort MLflow logging that self-disables (with one warning) if the
+    tracking store is unavailable or read-only, instead of raising per epoch."""
 
-        os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
-        import mlflow
+    def __init__(self, cfg: ExperimentConfig):
+        self.active = False
+        try:
+            os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
+            import mlflow
 
-        mlflow.set_experiment(cfg.train.mlflow_experiment)
-        run = mlflow.start_run(run_name=cfg.train.run_name)
-        mlflow.log_params(
-            {
-                "model": cfg.model.name,
-                "hidden_size": cfg.model.hidden_size,
-                "num_layers": cfg.model.num_layers,
-                "loss": cfg.train.loss,
-                "lr": cfg.train.lr,
-                "batch_size": cfg.train.batch_size,
-                "data_source": cfg.data.source,
-            }
-        )
-        return run
-    except Exception as exc:  # pragma: no cover
-        log.warning("MLflow disabled (%s)", exc)
-        return None
+            self._mlflow = mlflow
+            mlflow.set_experiment(cfg.train.mlflow_experiment)
+            mlflow.start_run(run_name=cfg.train.run_name)
+            mlflow.log_params(
+                {
+                    "model": cfg.model.name,
+                    "hidden_size": cfg.model.hidden_size,
+                    "num_layers": cfg.model.num_layers,
+                    "loss": cfg.train.loss,
+                    "lr": cfg.train.lr,
+                    "batch_size": cfg.train.batch_size,
+                    "data_source": cfg.data.source,
+                }
+            )
+            self.active = True
+        except Exception as exc:  # pragma: no cover - environment dependent
+            log.warning("MLflow logging disabled (%s)", exc)
 
+    def _guard(self, fn) -> None:
+        if not self.active:
+            return
+        try:
+            fn()
+        except Exception as exc:  # pragma: no cover
+            log.warning("MLflow logging disabled after error (%s)", exc)
+            self.active = False
 
-def _mlflow_log(run, row: dict[str, float], step: int) -> None:
-    if run is None:
-        return
-    try:
-        import mlflow
+    def log_metrics(self, row: dict[str, float], step: int | None = None) -> None:
+        payload = {k: float(v) for k, v in row.items() if k != "epoch"}
+        self._guard(lambda: self._mlflow.log_metrics(payload, step=step))
 
-        mlflow.log_metrics({k: float(v) for k, v in row.items() if k != "epoch"}, step=step)
-    except Exception:  # pragma: no cover
-        pass
-
-
-def _mlflow_end(run, metrics: dict[str, float]) -> None:
-    if run is None:
-        return
-    try:
-        import mlflow
-
-        mlflow.log_metrics({k: float(v) for k, v in metrics.items()})
-        mlflow.end_run()
-    except Exception:  # pragma: no cover
-        pass
+    def end(self, metrics: dict[str, float]) -> None:
+        self._guard(lambda: self._mlflow.log_metrics({k: float(v) for k, v in metrics.items()}))
+        self._guard(self._mlflow.end_run)
