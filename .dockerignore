@@ -1,0 +1,16 @@
+.git
+.venv
+.probe
+artifacts
+mlruns
+data/raw
+data/processed
+data/sample
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.mypy_cache
+*.ipynb
+docs
+notebooks
+tests

@@ -1,0 +1,9 @@
+# Unidirectional GRU risk model.
+model:
+  name: gru
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+train:
+  lr: 0.0005
+output_dir: artifacts/gru

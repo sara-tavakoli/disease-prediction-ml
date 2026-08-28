@@ -1,0 +1,8 @@
+# Gradient-boosting baseline over sliding-window tabular features.
+model:
+  name: lightgbm
+  gbm_num_leaves: 64
+  gbm_learning_rate: 0.03
+  gbm_n_estimators: 800
+  gbm_window: 8
+output_dir: artifacts/lightgbm

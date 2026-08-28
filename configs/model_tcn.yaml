@@ -1,0 +1,10 @@
+# Temporal Convolutional Network with causal ("chomp") padding.
+model:
+  name: tcn
+  hidden_size: 128
+  num_layers: 5
+  tcn_kernel_size: 3
+  dropout: 0.2
+train:
+  lr: 0.0004
+output_dir: artifacts/tcn

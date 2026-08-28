@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: "Early Sepsis Prediction from Clinical Time Series"
+message: "If you use this software, please cite it and the PhysioNet/CinC 2019 Challenge."
+type: software
+authors:
+  - given-names: Sara
+    family-names: Tavakoli
+repository-code: "https://github.com/sara-tavakoli/disease-prediction-ml"
+license: MIT
+keywords:
+  - sepsis
+  - clinical machine learning
+  - time series
+  - conformal prediction
+  - explainable AI
+  - algorithmic fairness
+references:
+  - type: article
+    title: "Early Prediction of Sepsis From Clinical Data: The PhysioNet/Computing in Cardiology Challenge 2019"
+    authors:
+      - family-names: Reyna
+        given-names: Matthew A.
+    journal: "Critical Care Medicine"
+    year: 2020
+    doi: 10.1097/CCM.0000000000004145

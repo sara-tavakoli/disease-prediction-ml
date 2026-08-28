@@ -1,0 +1,59 @@
+# Base experiment configuration. Compose with a model file, e.g.
+#   sepsis train --config configs/base.yaml configs/model_transformer.yaml
+# Override any leaf from the CLI:
+#   sepsis train --config configs/base.yaml --set train.epochs=5 data.source=synthetic
+
+output_dir: artifacts/run
+tags:
+  project: sepsis-early-warning
+
+data:
+  root: data/raw
+  processed_dir: data/processed
+  source: synthetic          # "physionet" downloads a sample if data/raw is empty
+  synthetic_n_patients: 4000
+  synthetic_prevalence: 0.08
+  resample_hours: 1
+  max_seq_len: 336
+  label_shift_hours: 6        # documents the challenge's built-in shift
+  val_fraction: 0.15
+  test_fraction: 0.15
+  group_by_hospital: true     # train on setA, external-test on setB when both exist
+  seed: 20190804
+
+model:
+  name: transformer
+  hidden_size: 128
+  num_layers: 2
+  num_heads: 8
+  dropout: 0.2
+  tcn_kernel_size: 3
+  bidirectional: false
+  gbm_num_leaves: 64
+  gbm_learning_rate: 0.03
+  gbm_n_estimators: 600
+  gbm_window: 8
+
+train:
+  epochs: 40
+  batch_size: 128
+  lr: 0.0003
+  weight_decay: 0.00001
+  grad_clip: 1.0
+  loss: focal
+  focal_gamma: 2.0
+  pos_weight: null            # null -> derived from train prevalence
+  early_stopping_patience: 7
+  monitor: val_auprc
+  num_workers: 0
+  device: auto
+  amp: false
+  seed: 20190804
+  mlflow_experiment: sepsis-early-warning
+  run_name: null
+
+uncertainty:
+  calibration: isotonic       # isotonic | platt | temperature | none
+  conformal_alpha: 0.1
+  conformal_mondrian: true
+  mc_dropout_samples: 30

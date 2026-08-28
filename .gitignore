@@ -1,0 +1,42 @@
+# Data — large raw / derived artifacts are not versioned (sample/ is the exception)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/sample/**
+
+# Model + experiment artifacts
+artifacts/*
+!artifacts/.gitkeep
+mlruns/
+mlartifacts/
+*.pt
+*.pth
+*.joblib
+*.pkl
+*.onnx
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.probe/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

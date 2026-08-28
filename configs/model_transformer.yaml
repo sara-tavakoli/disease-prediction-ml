@@ -1,0 +1,12 @@
+# Causal Transformer encoder (subsequent-position mask + padding mask).
+model:
+  name: transformer
+  hidden_size: 128
+  num_layers: 3
+  num_heads: 8
+  dropout: 0.2
+train:
+  lr: 0.0003
+  batch_size: 128
+  run_name: transformer
+output_dir: artifacts/transformer

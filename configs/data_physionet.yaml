@@ -1,0 +1,6 @@
+# Use the real PhysioNet/CinC 2019 data (downloads a sample into data/raw if empty;
+# run `sepsis download --full` for the complete ~40k-stay corpus).
+data:
+  source: physionet
+  root: data/raw
+  group_by_hospital: true

@@ -1,0 +1,14 @@
+# Tiny, fast configuration for CI / local sanity checks.
+data:
+  source: synthetic
+  synthetic_n_patients: 300
+  synthetic_prevalence: 0.12
+  max_seq_len: 80
+  group_by_hospital: false
+train:
+  epochs: 2
+  batch_size: 64
+  early_stopping_patience: 5
+uncertainty:
+  conformal_alpha: 0.2
+output_dir: artifacts/smoke
