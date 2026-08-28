@@ -48,7 +48,6 @@ def mc_dropout_predict(
         "y_true": np.concatenate(y_list).astype(np.int8),
         # predictive entropy of the Bernoulli mean (total uncertainty)
         "entropy": -(
-            mean * np.log(np.clip(mean, 1e-9, 1))
-            + (1 - mean) * np.log(np.clip(1 - mean, 1e-9, 1))
+            mean * np.log(np.clip(mean, 1e-9, 1)) + (1 - mean) * np.log(np.clip(1 - mean, 1e-9, 1))
         ),
     }

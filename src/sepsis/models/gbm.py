@@ -80,16 +80,15 @@ class GBMRiskModel:
             best_iteration=int(self.booster.best_iteration or self.cfg.gbm_n_estimators),
             feature_importance=imp,
         )
-        log.info("GBM trained: val AUPRC=%.4f best_iter=%d",
-                 res.val_auprc, res.best_iteration)
+        log.info("GBM trained: val AUPRC=%.4f best_iter=%d", res.val_auprc, res.best_iteration)
         return res
 
     def predict(self, table: WindowedTable) -> np.ndarray:
         if self.booster is None:
             raise RuntimeError("fit() first")
-        return self.booster.predict(
-            table.X, num_iteration=self.booster.best_iteration
-        ).astype(np.float64)
+        return self.booster.predict(table.X, num_iteration=self.booster.best_iteration).astype(
+            np.float64
+        )
 
     def predict_sequences(
         self, table: WindowedTable, n_sequences: int, max_len: int

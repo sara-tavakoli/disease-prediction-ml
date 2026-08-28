@@ -22,10 +22,10 @@ _AGG = ("last", "mean", "min", "max", "std", "slope", "obs_frac", "delta")
 
 @dataclasses.dataclass
 class WindowedTable:
-    X: np.ndarray            # (rows, n_features)
-    y: np.ndarray            # (rows,)
-    groups: np.ndarray       # (rows,) stay index into the source TensorDataset
-    times: np.ndarray        # (rows,) hour index within the stay
+    X: np.ndarray  # (rows, n_features)
+    y: np.ndarray  # (rows,)
+    groups: np.ndarray  # (rows,) stay index into the source TensorDataset
+    times: np.ndarray  # (rows,) hour index within the stay
     feature_names: list[str]
 
     def __len__(self) -> int:
@@ -40,11 +40,12 @@ class WindowFeatureExtractor:
         self._value_idx = list(range(len(DYNAMIC_COLS)))
         self._mask_idx = list(range(len(DYNAMIC_COLS), 2 * len(DYNAMIC_COLS)))
         self._delta_idx = list(range(2 * len(DYNAMIC_COLS), 3 * len(DYNAMIC_COLS)))
-        self._static_idx = list(range(3 * len(DYNAMIC_COLS),
-                                      3 * len(DYNAMIC_COLS) + len(STATIC_COLS)))
-        self.feature_names = [
-            f"{c}__{agg}" for c in DYNAMIC_COLS for agg in _AGG
-        ] + [f"{c}__static" for c in STATIC_COLS]
+        self._static_idx = list(
+            range(3 * len(DYNAMIC_COLS), 3 * len(DYNAMIC_COLS) + len(STATIC_COLS))
+        )
+        self.feature_names = [f"{c}__{agg}" for c in DYNAMIC_COLS for agg in _AGG] + [
+            f"{c}__static" for c in STATIC_COLS
+        ]
 
     def transform(self, td: TensorDataset) -> WindowedTable:
         w = self.window
@@ -66,26 +67,24 @@ class WindowFeatureExtractor:
             static_row = seq[0, self._static_idx]
             for t in range(n):
                 lo = max(0, t - w + 1)
-                win = val[lo:t + 1]                       # (win_len, n_dyn)
-                win_mask = msk[lo:t + 1]
+                win = val[lo : t + 1]  # (win_len, n_dyn)
+                win_mask = msk[lo : t + 1]
                 pad = w - win.shape[0]
                 if pad:
                     win = np.vstack([np.repeat(win[:1], pad, axis=0), win])
-                    win_mask = np.vstack(
-                        [np.zeros((pad, n_dyn), dtype=win_mask.dtype), win_mask]
-                    )
+                    win_mask = np.vstack([np.zeros((pad, n_dyn), dtype=win_mask.dtype), win_mask])
                 mean = win.mean(axis=0)
                 slope = ((ramp[:, None] * (win - mean)).sum(axis=0)) / ramp_ss
                 feat = np.concatenate(
                     [
-                        win[-1],                         # last
-                        mean,                            # mean
-                        win.min(axis=0),                 # min
-                        win.max(axis=0),                 # max
-                        win.std(axis=0),                 # std
-                        slope,                           # linear trend
-                        win_mask.mean(axis=0),           # observed fraction
-                        dlt[t],                          # recency
+                        win[-1],  # last
+                        mean,  # mean
+                        win.min(axis=0),  # min
+                        win.max(axis=0),  # max
+                        win.std(axis=0),  # std
+                        slope,  # linear trend
+                        win_mask.mean(axis=0),  # observed fraction
+                        dlt[t],  # recency
                         static_row,
                     ]
                 ).astype(np.float32)

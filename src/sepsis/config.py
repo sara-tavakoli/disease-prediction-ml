@@ -24,15 +24,15 @@ DEFAULT_CONFIG_DIR = PROJECT_ROOT / "configs"
 class DataConfig:
     root: str = "data/raw"
     processed_dir: str = "data/processed"
-    source: str = "physionet"          # "physionet" | "synthetic"
+    source: str = "physionet"  # "physionet" | "synthetic"
     synthetic_n_patients: int = 4000
     synthetic_prevalence: float = 0.08
     resample_hours: int = 1
-    max_seq_len: int = 336             # 14 days; longer stays are left-truncated
+    max_seq_len: int = 336  # 14 days; longer stays are left-truncated
     label_shift_hours: int = 6
     val_fraction: float = 0.15
     test_fraction: float = 0.15
-    group_by_hospital: bool = True     # split so set A / set B never mix
+    group_by_hospital: bool = True  # split so set A / set B never mix
     seed: int = 20190804
 
     def __post_init__(self) -> None:
@@ -46,18 +46,18 @@ class DataConfig:
 
 @dataclass
 class ModelConfig:
-    name: str = "transformer"          # transformer|lstm|gru|tcn|lightgbm
+    name: str = "transformer"  # transformer|lstm|gru|tcn|lightgbm
     hidden_size: int = 128
     num_layers: int = 2
-    num_heads: int = 8                 # transformer only
+    num_heads: int = 8  # transformer only
     dropout: float = 0.2
-    tcn_kernel_size: int = 3           # tcn only
-    bidirectional: bool = False        # rnn only; leaks future -> keep False
+    tcn_kernel_size: int = 3  # tcn only
+    bidirectional: bool = False  # rnn only; leaks future -> keep False
     # gradient-boosting baseline
     gbm_num_leaves: int = 64
     gbm_learning_rate: float = 0.03
     gbm_n_estimators: int = 600
-    gbm_window: int = 8               # hours of history per tabular row
+    gbm_window: int = 8  # hours of history per tabular row
 
     def __post_init__(self) -> None:
         allowed = {"transformer", "lstm", "gru", "tcn", "lightgbm"}
@@ -74,13 +74,13 @@ class TrainConfig:
     lr: float = 3e-4
     weight_decay: float = 1e-5
     grad_clip: float = 1.0
-    loss: str = "focal"               # focal|weighted_bce|bce
+    loss: str = "focal"  # focal|weighted_bce|bce
     focal_gamma: float = 2.0
-    pos_weight: float | None = None    # None -> derived from train prevalence
+    pos_weight: float | None = None  # None -> derived from train prevalence
     early_stopping_patience: int = 7
-    monitor: str = "val_auprc"        # metric maximised for checkpointing
+    monitor: str = "val_auprc"  # metric maximised for checkpointing
     num_workers: int = 0
-    device: str = "auto"              # auto|cpu|cuda|mps
+    device: str = "auto"  # auto|cpu|cuda|mps
     amp: bool = False
     seed: int = 20190804
     mlflow_experiment: str = "sepsis-early-warning"
@@ -89,9 +89,9 @@ class TrainConfig:
 
 @dataclass
 class UncertaintyConfig:
-    calibration: str = "isotonic"     # isotonic|platt|temperature|none
-    conformal_alpha: float = 0.1      # target miscoverage for risk sets
-    conformal_mondrian: bool = True   # class-conditional (per-timestep label)
+    calibration: str = "isotonic"  # isotonic|platt|temperature|none
+    conformal_alpha: float = 0.1  # target miscoverage for risk sets
+    conformal_mondrian: bool = True  # class-conditional (per-timestep label)
     mc_dropout_samples: int = 30
 
 

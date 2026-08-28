@@ -48,8 +48,9 @@ class PredictionBundle:
         cfg = ExperimentConfig.from_dict(json.loads((run_dir / "config.json").read_text()))
         art = PreprocessArtifacts.load(run_dir / "preprocess.json")
         op = json.loads((run_dir / "operating_point.json").read_text())
-        return cls(cfg, art, float(op["alarm_threshold"]),
-                   float(op.get("conformal_alpha", 0.1)), run_dir)
+        return cls(
+            cfg, art, float(op["alarm_threshold"]), float(op.get("conformal_alpha", 0.1)), run_dir
+        )
 
 
 class SepsisPredictor:
@@ -84,9 +85,7 @@ class SepsisPredictor:
         else:
             from sepsis.models.gbm import GBMRiskModel
 
-            self._model = GBMRiskModel(cfg.model).load(
-                str(self.bundle.run_dir / "model.txt")
-            )
+            self._model = GBMRiskModel(cfg.model).load(str(self.bundle.run_dir / "model.txt"))
         return self._model
 
     # --------------------------------------------------------------- predict --
@@ -96,8 +95,10 @@ class SepsisPredictor:
         if frame["ICULOS"].isna().all():
             frame["ICULOS"] = np.arange(1, len(frame) + 1, dtype="float32")
         return PatientRecord(
-            pid=patient_id, frame=frame,
-            label=np.zeros(len(frame), dtype=np.int8), source="live",
+            pid=patient_id,
+            frame=frame,
+            label=np.zeros(len(frame), dtype=np.int8),
+            source="live",
         )
 
     def predict(self, patient_id: str, rows: list[dict], explain: bool = True) -> dict:

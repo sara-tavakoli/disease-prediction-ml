@@ -15,8 +15,13 @@ def test_compose_yaml_files_left_to_right():
 def test_dotted_overrides_and_type_coercion():
     cfg = ExperimentConfig.load(
         "configs/base.yaml",
-        overrides=["train.epochs=3", "model.dropout=0.4", "train.amp=true",
-                   "train.pos_weight=none", "data.source=physionet"],
+        overrides=[
+            "train.epochs=3",
+            "model.dropout=0.4",
+            "train.amp=true",
+            "train.pos_weight=none",
+            "data.source=physionet",
+        ],
     )
     assert cfg.train.epochs == 3 and isinstance(cfg.train.epochs, int)
     assert cfg.model.dropout == 0.4
@@ -36,8 +41,7 @@ def test_validation_catches_bad_values():
     with pytest.raises(ValueError):
         ExperimentConfig.load(
             "configs/base.yaml",
-            overrides=["model.name=transformer", "model.hidden_size=100",
-                       "model.num_heads=8"],
+            overrides=["model.name=transformer", "model.hidden_size=100", "model.num_heads=8"],
         )
 
 

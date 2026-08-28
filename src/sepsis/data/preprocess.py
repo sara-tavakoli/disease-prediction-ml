@@ -65,11 +65,11 @@ class PreprocessArtifacts:
 class TensorDataset:
     """Right-padded arrays. ``X[i, :lengths[i]]`` is the real sequence."""
 
-    X: np.ndarray             # (N, T, F) float32
-    y: np.ndarray             # (N, T)    int8
-    lengths: np.ndarray       # (N,)      int32
+    X: np.ndarray  # (N, T, F) float32
+    y: np.ndarray  # (N, T)    int8
+    lengths: np.ndarray  # (N,)      int32
     pids: list[str]
-    static_raw: np.ndarray    # (N, len(STATIC_COLS)) float32, pre-standardisation
+    static_raw: np.ndarray  # (N, len(STATIC_COLS)) float32, pre-standardisation
     feature_names: list[str]
 
     def __len__(self) -> int:
@@ -150,8 +150,7 @@ class Preprocessor:
             max_seq_len=self.max_seq_len,
             clip_ranges={k: list(v) for k, v in PHYSIOLOGIC_RANGES.items()},
         )
-        log.info("fitted preprocessor: %d features, %d train stays",
-                 len(feat_names), len(records))
+        log.info("fitted preprocessor: %d features, %d train stays", len(feat_names), len(records))
         return self
 
     # -------------------------------------------------------------- transform --
@@ -188,10 +187,7 @@ class Preprocessor:
         stat = rec.static_vector()
         static_row = np.array(
             [
-                (
-                    (stat[c] if not np.isnan(stat[c]) else a.static_mean[c])
-                    - a.static_mean[c]
-                )
+                ((stat[c] if not np.isnan(stat[c]) else a.static_mean[c]) - a.static_mean[c])
                 / a.static_std[c]
                 for c in STATIC_COLS
             ],
@@ -223,8 +219,12 @@ class Preprocessor:
             static_raw[i] = [sv[c] for c in STATIC_COLS]
 
         return TensorDataset(
-            X=X, y=y, lengths=lengths, pids=pids,
-            static_raw=static_raw, feature_names=self.artifacts.feature_names,
+            X=X,
+            y=y,
+            lengths=lengths,
+            pids=pids,
+            static_raw=static_raw,
+            feature_names=self.artifacts.feature_names,
         )
 
     def fit_transform(self, records: list[PatientRecord]) -> TensorDataset:

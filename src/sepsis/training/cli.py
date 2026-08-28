@@ -22,10 +22,20 @@ log = get_logger("cli")
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--config", nargs="*", default=["configs/base.yaml"],
-                   help="one or more YAML files, merged left-to-right")
-    p.add_argument("--set", dest="overrides", nargs="*", default=[],
-                   metavar="a.b=c", help="dotted config overrides")
+    p.add_argument(
+        "--config",
+        nargs="*",
+        default=["configs/base.yaml"],
+        help="one or more YAML files, merged left-to-right",
+    )
+    p.add_argument(
+        "--set",
+        dest="overrides",
+        nargs="*",
+        default=[],
+        metavar="a.b=c",
+        help="dotted config overrides",
+    )
     p.add_argument("--output-dir", default=None)
 
 
@@ -38,13 +48,18 @@ def cmd_train(args: argparse.Namespace) -> int:
     log.info("resolved config:\n%s", json.dumps(cfg.to_dict(), indent=2))
     results = run_experiment(cfg)
     disc = results["discrimination"]
-    print(json.dumps({
-        "output_dir": cfg.output_dir,
-        "auroc": disc["auroc"]["point"],
-        "auprc": disc["auprc"]["point"],
-        "utility": results["utility"]["test_utility"]["normalized"],
-        "ece_calibrated": results["calibration"]["ece_calibrated"]["ece"],
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "output_dir": cfg.output_dir,
+                "auroc": disc["auroc"]["point"],
+                "auprc": disc["auprc"]["point"],
+                "utility": results["utility"]["test_utility"]["normalized"],
+                "ece_calibrated": results["calibration"]["ece_calibrated"]["ece"],
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
@@ -54,8 +69,9 @@ def cmd_synth(args: argparse.Namespace) -> int:
     recs = generate_cohort(args.n, args.prevalence, args.seed)
     write_cohort(recs, args.out)
     n_sep = sum(r.is_septic for r in recs)
-    log.info("wrote %d synthetic stays (%d septic) to %s/training_setSYN",
-             len(recs), n_sep, args.out)
+    log.info(
+        "wrote %d synthetic stays (%d septic) to %s/training_setSYN", len(recs), n_sep, args.out
+    )
     return 0
 
 
@@ -84,8 +100,9 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="sepsis", description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        prog="sepsis", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     sub = p.add_subparsers(dest="command", required=True)
 
     t = sub.add_parser("train", help="run the full experiment pipeline")

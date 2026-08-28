@@ -94,17 +94,19 @@ def integrated_gradients(
         f_base = float(model(base.unsqueeze(0), pad_mask)[0, tgt])
     attr = attributions.cpu().numpy()
     return {
-        "attributions": attr,                       # (T, F)
+        "attributions": attr,  # (T, F)
         "target_t": tgt,
         "completeness_gap": float(f_x - f_base - attr.sum()),
         "f_x": f_x,
         "f_baseline": f_base,
-        "per_feature": attr.sum(axis=0),            # (F,)
-        "per_timestep": attr.sum(axis=1),          # (T,)
+        "per_feature": attr.sum(axis=0),  # (F,)
+        "per_timestep": attr.sum(axis=1),  # (T,)
     }
 
 
-def group_attributions(per_feature: np.ndarray, feature_names: list[str]) -> list[tuple[str, float]]:
+def group_attributions(
+    per_feature: np.ndarray, feature_names: list[str]
+) -> list[tuple[str, float]]:
     """Sum signed attributions across the value/mask/delta/static columns that
     share a channel name, then rank by absolute total."""
     base_names = list(DYNAMIC_COLS) + list(STATIC_COLS)

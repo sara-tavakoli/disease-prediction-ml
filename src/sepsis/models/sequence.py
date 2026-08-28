@@ -77,9 +77,7 @@ class RNNRiskModel(_BaseSequenceModel):
             x, lengths, batch_first=True, enforce_sorted=False
         )
         out, _ = self.rnn(packed)
-        out, _ = nn.utils.rnn.pad_packed_sequence(
-            out, batch_first=True, total_length=x.size(1)
-        )
+        out, _ = nn.utils.rnn.pad_packed_sequence(out, batch_first=True, total_length=x.size(1))
         return self.head(self.drop(out)).squeeze(-1)
 
 
@@ -134,10 +132,7 @@ class TCNRiskModel(_BaseSequenceModel):
         layers = []
         c_in = input_size
         for i in range(num_layers):
-            layers.append(
-                _TCNBlock(c_in, hidden_size, kernel_size, dilation=2**i,
-                          dropout=dropout)
-            )
+            layers.append(_TCNBlock(c_in, hidden_size, kernel_size, dilation=2**i, dropout=dropout))
             c_in = hidden_size
         self.tcn = nn.Sequential(*layers)
         self.head = nn.Linear(hidden_size, 1)
@@ -197,9 +192,7 @@ class TransformerRiskModel(_BaseSequenceModel):
     def forward(self, x, pad_mask=None):
         B, T, _ = x.shape
         h = self.pos(self.in_proj(x))
-        causal = torch.triu(
-            torch.ones(T, T, device=x.device, dtype=torch.bool), diagonal=1
-        )
+        causal = torch.triu(torch.ones(T, T, device=x.device, dtype=torch.bool), diagonal=1)
         key_padding = (~pad_mask) if pad_mask is not None else None
         h = self.encoder(h, mask=causal, src_key_padding_mask=key_padding)
         return self.head(self.drop(h)).squeeze(-1)
@@ -216,8 +209,13 @@ class TransformerRiskModel(_BaseSequenceModel):
         rollout = torch.eye(T, device=x.device).unsqueeze(0).repeat(B, 1, 1)
         for layer in self.encoder.layers:
             attn = layer.self_attn(
-                h, h, h, attn_mask=causal, key_padding_mask=key_padding,
-                need_weights=True, average_attn_weights=True,
+                h,
+                h,
+                h,
+                attn_mask=causal,
+                key_padding_mask=key_padding,
+                need_weights=True,
+                average_attn_weights=True,
             )[1]
             attn = attn + torch.eye(T, device=x.device).unsqueeze(0)
             attn = attn / attn.sum(dim=-1, keepdim=True).clamp_min(1e-9)

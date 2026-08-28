@@ -79,9 +79,17 @@ def download_full(root: str | Path) -> None:  # pragma: no cover - network heavy
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
     cmd = [
-        "wget", "-r", "-N", "-c", "-np", "-nH", "--cut-dirs=4",
-        "-R", "index.html*",
-        "-P", str(root),
+        "wget",
+        "-r",
+        "-N",
+        "-c",
+        "-np",
+        "-nH",
+        "--cut-dirs=4",
+        "-R",
+        "index.html*",
+        "-P",
+        str(root),
         f"{BASE}/training/",
     ]
     log.info("running: %s", " ".join(cmd))
@@ -107,10 +115,12 @@ def ensure_physionet(root: str | Path, min_files: int = 50) -> Path:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root", default="data/raw")
-    ap.add_argument("--limit", type=int, default=400,
-                    help="stays per training set for the sample path")
-    ap.add_argument("--full", action="store_true",
-                    help="mirror the entire 1.0.0 training tree with wget")
+    ap.add_argument(
+        "--limit", type=int, default=400, help="stays per training set for the sample path"
+    )
+    ap.add_argument(
+        "--full", action="store_true", help="mirror the entire 1.0.0 training tree with wget"
+    )
     args = ap.parse_args(argv)
 
     if args.full:

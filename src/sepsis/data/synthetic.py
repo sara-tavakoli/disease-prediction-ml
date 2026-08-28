@@ -39,21 +39,45 @@ from sepsis.data.psv import PatientRecord
 
 # per-hour probability that a lab is drawn (roughly matches real sparsity)
 _LAB_OBS_PROB: dict[str, float] = {
-    "Glucose": 0.11, "Potassium": 0.09, "Creatinine": 0.08, "BUN": 0.08,
-    "Hct": 0.08, "Hgb": 0.08, "WBC": 0.07, "Platelets": 0.07, "Calcium": 0.06,
-    "Chloride": 0.06, "HCO3": 0.06, "Magnesium": 0.05, "Lactate": 0.05,
-    "pH": 0.045, "PaCO2": 0.04, "BaseExcess": 0.04, "FiO2": 0.05, "SaO2": 0.04,
-    "Phosphate": 0.035, "PTT": 0.03, "AST": 0.02, "Alkalinephos": 0.02,
-    "Bilirubin_total": 0.02, "Fibrinogen": 0.012, "TroponinI": 0.012,
+    "Glucose": 0.11,
+    "Potassium": 0.09,
+    "Creatinine": 0.08,
+    "BUN": 0.08,
+    "Hct": 0.08,
+    "Hgb": 0.08,
+    "WBC": 0.07,
+    "Platelets": 0.07,
+    "Calcium": 0.06,
+    "Chloride": 0.06,
+    "HCO3": 0.06,
+    "Magnesium": 0.05,
+    "Lactate": 0.05,
+    "pH": 0.045,
+    "PaCO2": 0.04,
+    "BaseExcess": 0.04,
+    "FiO2": 0.05,
+    "SaO2": 0.04,
+    "Phosphate": 0.035,
+    "PTT": 0.03,
+    "AST": 0.02,
+    "Alkalinephos": 0.02,
+    "Bilirubin_total": 0.02,
+    "Fibrinogen": 0.012,
+    "TroponinI": 0.012,
     "Bilirubin_direct": 0.006,
 }
-_VITAL_MISS_PROB = 0.06   # vitals present most hours, with short gaps
+_VITAL_MISS_PROB = 0.06  # vitals present most hours, with short gaps
 
 # OU parameters per vital: (reversion theta, process sigma)
 _OU: dict[str, tuple[float, float]] = {
-    "HR": (0.25, 3.0), "O2Sat": (0.4, 0.8), "Temp": (0.15, 0.15),
-    "SBP": (0.3, 4.0), "MAP": (0.3, 3.0), "DBP": (0.3, 3.0),
-    "Resp": (0.3, 1.2), "EtCO2": (0.3, 2.0),
+    "HR": (0.25, 3.0),
+    "O2Sat": (0.4, 0.8),
+    "Temp": (0.15, 0.15),
+    "SBP": (0.3, 4.0),
+    "MAP": (0.3, 3.0),
+    "DBP": (0.3, 3.0),
+    "Resp": (0.3, 1.2),
+    "EtCO2": (0.3, 2.0),
 }
 
 
@@ -69,8 +93,7 @@ def _patient_static(rng: np.random.Generator) -> dict[str, float]:
     unit1 = 1.0 if unit == 1.0 else (0.0 if unit == 2.0 else np.nan)
     unit2 = 1.0 if unit == 2.0 else (0.0 if unit == 1.0 else np.nan)
     hosp_adm = float(-np.abs(rng.exponential(60.0)))
-    return {"Age": age, "Gender": gender, "Unit1": unit1, "Unit2": unit2,
-            "HospAdmTime": hosp_adm}
+    return {"Age": age, "Gender": gender, "Unit1": unit1, "Unit2": unit2, "HospAdmTime": hosp_adm}
 
 
 def _baselines(age: float, rng: np.random.Generator) -> dict[str, float]:
@@ -87,8 +110,9 @@ def _baselines(age: float, rng: np.random.Generator) -> dict[str, float]:
     }
 
 
-def _ou_series(baseline: float, theta: float, sigma: float, n: int,
-               rng: np.random.Generator) -> np.ndarray:
+def _ou_series(
+    baseline: float, theta: float, sigma: float, n: int, rng: np.random.Generator
+) -> np.ndarray:
     x = np.empty(n, dtype=np.float64)
     x[0] = baseline + sigma * rng.standard_normal()
     for t in range(1, n):
@@ -120,7 +144,7 @@ def generate_patient(
     onset = int(rng.integers(6, n)) if (septic and n > 7) else -1
     if onset < 0:
         septic = False
-    sev = 0.6 + 0.8 * rng.random()          # per-patient severity multiplier
+    sev = 0.6 + 0.8 * rng.random()  # per-patient severity multiplier
     lead = int(rng.integers(6, 16))
     ramp = _deterioration_ramp(n, onset, lead) if septic else np.zeros(n)
 
@@ -207,8 +231,7 @@ def generate_cohort(
     for i, is_sep in enumerate(flags):
         child = np.random.default_rng(rng.integers(0, 2**63 - 1))
         out.append(
-            generate_patient(f"s{i:06d}", child, force_septic=bool(is_sep),
-                             prevalence=prevalence)
+            generate_patient(f"s{i:06d}", child, force_septic=bool(is_sep), prevalence=prevalence)
         )
     return out
 
@@ -224,5 +247,4 @@ def write_cohort(records: list[PatientRecord], out_dir: str) -> None:
     for rec in records:
         df = rec.frame.copy()
         df[LABEL_COL] = rec.label
-        df.to_csv(sub / f"{rec.pid}.psv", sep="|", index=False,
-                  na_rep="NaN", float_format="%.4g")
+        df.to_csv(sub / f"{rec.pid}.psv", sep="|", index=False, na_rep="NaN", float_format="%.4g")

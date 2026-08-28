@@ -13,15 +13,32 @@ pytestmark = pytest.mark.slow
 def test_pipeline_end_to_end_and_serving(smoke_config, tmp_path):
     results = run_experiment(smoke_config)
 
-    for key in ("discrimination", "calibration", "conformal", "utility",
-                "fairness", "robustness", "explainability"):
+    for key in (
+        "discrimination",
+        "calibration",
+        "conformal",
+        "utility",
+        "fairness",
+        "robustness",
+        "explainability",
+    ):
         assert key in results
 
     run_dir = smoke_config.output_dir
-    for f in ("config.json", "preprocess.json", "model.pt",
-              "calibrator.joblib", "conformal.joblib", "operating_point.json",
-              "results.json"):
-        assert (run_dir / f if hasattr(run_dir, "__truediv__") else __import__("pathlib").Path(run_dir) / f).exists()
+    for f in (
+        "config.json",
+        "preprocess.json",
+        "model.pt",
+        "calibrator.joblib",
+        "conformal.joblib",
+        "operating_point.json",
+        "results.json",
+    ):
+        assert (
+            run_dir / f
+            if hasattr(run_dir, "__truediv__")
+            else __import__("pathlib").Path(run_dir) / f
+        ).exists()
 
     # calibration should not make ECE dramatically worse
     c = results["calibration"]
@@ -43,9 +60,20 @@ def test_pipeline_end_to_end_and_serving(smoke_config, tmp_path):
     assert client.get("/health").json()["model_loaded"] is True
 
     rows = [
-        {"HR": 90 + i, "O2Sat": 97, "SBP": 120 - i, "MAP": 78 - i, "Resp": 18,
-         "Temp": 37.0, "Age": 70, "Gender": 1, "Unit1": 1, "Unit2": 0,
-         "HospAdmTime": -12, "ICULOS": i + 1}
+        {
+            "HR": 90 + i,
+            "O2Sat": 97,
+            "SBP": 120 - i,
+            "MAP": 78 - i,
+            "Resp": 18,
+            "Temp": 37.0,
+            "Age": 70,
+            "Gender": 1,
+            "Unit1": 1,
+            "Unit2": 0,
+            "HospAdmTime": -12,
+            "ICULOS": i + 1,
+        }
         for i in range(12)
     ]
     resp = client.post("/predict", json={"patient_id": "t1", "hours": rows})

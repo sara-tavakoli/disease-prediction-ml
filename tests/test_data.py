@@ -14,9 +14,7 @@ def test_synthetic_is_deterministic():
     assert [r.pid for r in a] == [r.pid for r in b]
     for x, y in zip(a, b):
         np.testing.assert_array_equal(x.label, y.label)
-        np.testing.assert_allclose(
-            x.frame.to_numpy(), y.frame.to_numpy(), equal_nan=True
-        )
+        np.testing.assert_allclose(x.frame.to_numpy(), y.frame.to_numpy(), equal_nan=True)
 
 
 def test_synthetic_prevalence_is_respected():

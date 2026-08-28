@@ -68,6 +68,4 @@ def test_carry_forward_is_causal(splits):
         rec, frame=rec.frame.iloc[:t0].reset_index(drop=True), label=rec.label[:t0]
     )
     td_prefix = pre.transform([rec_prefix])
-    np.testing.assert_allclose(
-        td_full.X[0, :t0], td_prefix.X[0, :t0], rtol=1e-5, atol=1e-5
-    )
+    np.testing.assert_allclose(td_full.X[0, :t0], td_prefix.X[0, :t0], rtol=1e-5, atol=1e-5)

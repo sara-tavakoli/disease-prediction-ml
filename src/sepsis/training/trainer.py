@@ -69,12 +69,19 @@ class TrainOutput:
 
 def _loaders(train_td, val_td, batch_size, num_workers):
     tr = DataLoader(
-        SequenceDataset(train_td), batch_size=batch_size, shuffle=True,
-        collate_fn=collate_padded, num_workers=num_workers, drop_last=False,
+        SequenceDataset(train_td),
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=collate_padded,
+        num_workers=num_workers,
+        drop_last=False,
     )
     va = DataLoader(
-        SequenceDataset(val_td), batch_size=batch_size, shuffle=False,
-        collate_fn=collate_padded, num_workers=num_workers,
+        SequenceDataset(val_td),
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_padded,
+        num_workers=num_workers,
     )
     return tr, va
 
@@ -98,9 +105,9 @@ class SequenceTrainer:
         model = build_sequence_model(cfg.model, input_size=train_td.n_features)
         model.to(self.device)
 
-        loss_fn = build_loss(
-            cfg.train.loss, cfg.train.focal_gamma, self._pos_weight(train_td)
-        ).to(self.device)
+        loss_fn = build_loss(cfg.train.loss, cfg.train.focal_gamma, self._pos_weight(train_td)).to(
+            self.device
+        )
         opt = torch.optim.AdamW(
             model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay
         )
@@ -157,16 +164,18 @@ class SequenceTrainer:
             _mlflow_log(run, row, step=epoch)
             log.info(
                 "epoch %02d | loss %.4f | val AUROC %.4f | val AUPRC %.4f | %.1fs",
-                epoch, row["train_loss"], row["val_auroc"], row["val_auprc"], row["seconds"],
+                epoch,
+                row["train_loss"],
+                row["val_auroc"],
+                row["val_auprc"],
+                row["seconds"],
             )
 
             monitored = val["auprc"] if cfg.train.monitor == "val_auprc" else val["auroc"]
             if monitored > best_metric + 1e-5:
                 best_metric = monitored
                 best_epoch = epoch
-                best_state = {
-                    k: v.detach().cpu().clone() for k, v in model.state_dict().items()
-                }
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
                 patience = 0
             else:
                 patience += 1
@@ -177,17 +186,18 @@ class SequenceTrainer:
         model.load_state_dict(best_state)
         _mlflow_end(run, {"best_val_metric": best_metric, "best_epoch": best_epoch})
         return TrainOutput(
-            model=model, history=history, best_epoch=best_epoch,
-            best_metric=float(best_metric), best_state=best_state,
+            model=model,
+            history=history,
+            best_epoch=best_epoch,
+            best_metric=float(best_metric),
+            best_state=best_state,
             device=str(self.device),
         )
 
     @torch.no_grad()
     def evaluate(self, model, loader) -> dict[str, float]:
         model.eval()
-        loss_fn = build_loss(self.cfg.train.loss, self.cfg.train.focal_gamma, None).to(
-            self.device
-        )
+        loss_fn = build_loss(self.cfg.train.loss, self.cfg.train.focal_gamma, None).to(self.device)
         scores, labels = [], []
         total = 0.0
         for x, y, pad_mask, _ in loader:
@@ -214,7 +224,9 @@ def predict_sequence_scores(
     model.eval()
     model.to(device)
     loader = DataLoader(
-        SequenceDataset(td), batch_size=batch_size, shuffle=False,
+        SequenceDataset(td),
+        batch_size=batch_size,
+        shuffle=False,
         collate_fn=collate_padded,
     )
     out_scores: list[np.ndarray] = []
@@ -262,9 +274,7 @@ def _mlflow_log(run, row: dict[str, float], step: int) -> None:
     try:
         import mlflow
 
-        mlflow.log_metrics(
-            {k: float(v) for k, v in row.items() if k != "epoch"}, step=step
-        )
+        mlflow.log_metrics({k: float(v) for k, v in row.items() if k != "epoch"}, step=step)
     except Exception:  # pragma: no cover
         pass
 

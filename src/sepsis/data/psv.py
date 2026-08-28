@@ -27,9 +27,9 @@ class PatientRecord:
     """One ICU stay in tidy form."""
 
     pid: str
-    frame: pd.DataFrame              # index 0..T-1 (hours), columns = CHANNELS
-    label: np.ndarray               # shape (T,), int8 in {0, 1}
-    source: str = "unknown"         # e.g. "setA" / "setB" / "synthetic"
+    frame: pd.DataFrame  # index 0..T-1 (hours), columns = CHANNELS
+    label: np.ndarray  # shape (T,), int8 in {0, 1}
+    source: str = "unknown"  # e.g. "setA" / "setB" / "synthetic"
 
     @property
     def n_hours(self) -> int:

@@ -76,8 +76,7 @@ def plot_utility_threshold(grid, utilities, chosen, path: str | Path) -> str:
 
 def plot_subgroup_gaps(report: dict, path: str | Path) -> str:
     axes_names = list(report.keys())
-    fig, axs = plt.subplots(1, len(axes_names), figsize=(5 * len(axes_names), 4),
-                            squeeze=False)
+    fig, axs = plt.subplots(1, len(axes_names), figsize=(5 * len(axes_names), 4), squeeze=False)
     for k, axis in enumerate(axes_names):
         groups = report[axis]["groups"]
         names = list(groups.keys())

@@ -16,8 +16,7 @@ def cohort():
 
 @pytest.fixture(scope="session")
 def splits(cohort):
-    return make_splits(cohort, val_fraction=0.2, test_fraction=0.2, seed=7,
-                       group_by_hospital=False)
+    return make_splits(cohort, val_fraction=0.2, test_fraction=0.2, seed=7, group_by_hospital=False)
 
 
 @pytest.fixture(scope="session")

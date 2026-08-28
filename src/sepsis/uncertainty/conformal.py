@@ -46,8 +46,7 @@ class ConformalRiskClassifier:
         scores = 1.0 - p_true
 
         self.q_hat_marginal_ = float(
-            np.quantile(scores, _quantile_level(scores.size, self.alpha),
-                        method="higher")
+            np.quantile(scores, _quantile_level(scores.size, self.alpha), method="higher")
         )
         self.q_hat_ = {}
         for cls in (0, 1):
@@ -56,8 +55,7 @@ class ConformalRiskClassifier:
                 self.q_hat_[cls] = self.q_hat_marginal_
             else:
                 self.q_hat_[cls] = float(
-                    np.quantile(s, _quantile_level(s.size, self.alpha),
-                                method="higher")
+                    np.quantile(s, _quantile_level(s.size, self.alpha), method="higher")
                 )
         return self
 
@@ -110,7 +108,5 @@ class ConformalRiskClassifier:
         }
         for cls in (0, 1):
             m = y_true == cls
-            out[f"coverage_class{cls}"] = (
-                float(covered[m].mean()) if np.any(m) else float("nan")
-            )
+            out[f"coverage_class{cls}"] = float(covered[m].mean()) if np.any(m) else float("nan")
         return out

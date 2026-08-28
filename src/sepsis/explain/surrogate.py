@@ -36,7 +36,10 @@ class GlobalSurrogateTree:
         self.feature_names: list[str] | None = None
 
     def fit(
-        self, X: np.ndarray, model_probs: np.ndarray, feature_names: list[str],
+        self,
+        X: np.ndarray,
+        model_probs: np.ndarray,
+        feature_names: list[str],
         alarm_threshold: float = 0.5,
     ) -> SurrogateFit:
         self.feature_names = list(feature_names)
@@ -44,11 +47,7 @@ class GlobalSurrogateTree:
         self.tree.fit(X, y)
         pred_logit = self.tree.predict(X)
         surro_p = 1.0 / (1.0 + np.exp(-pred_logit))
-        agree = float(
-            np.mean(
-                (surro_p >= alarm_threshold) == (model_probs >= alarm_threshold)
-            )
-        )
+        agree = float(np.mean((surro_p >= alarm_threshold) == (model_probs >= alarm_threshold)))
         return SurrogateFit(
             fidelity_r2=float(r2_score(y, pred_logit)),
             alarm_agreement=agree,

@@ -33,18 +33,19 @@ def subgroup_assignments(static_raw: np.ndarray) -> dict[str, np.ndarray]:
         ["<40", "40-64", "65-79"],
         default="80+",
     )
-    sex = np.where(np.isnan(col["Gender"]), "unknown",
-                   np.where(col["Gender"] >= 0.5, "male", "female"))
-    unit = np.where(col["Unit1"] >= 0.5, "MICU",
-                    np.where(col["Unit2"] >= 0.5, "SICU", "unknown"))
-    return {"sex": sex.astype(object), "age_band": age_band.astype(object),
-            "icu_unit": unit.astype(object)}
+    sex = np.where(
+        np.isnan(col["Gender"]), "unknown", np.where(col["Gender"] >= 0.5, "male", "female")
+    )
+    unit = np.where(col["Unit1"] >= 0.5, "MICU", np.where(col["Unit2"] >= 0.5, "SICU", "unknown"))
+    return {
+        "sex": sex.astype(object),
+        "age_band": age_band.astype(object),
+        "icu_unit": unit.astype(object),
+    }
 
 
 def _expand_to_hours(stay_labels: np.ndarray, lengths: np.ndarray) -> np.ndarray:
-    return np.concatenate(
-        [np.repeat(stay_labels[i], int(n)) for i, n in enumerate(lengths)]
-    )
+    return np.concatenate([np.repeat(stay_labels[i], int(n)) for i, n in enumerate(lengths)])
 
 
 def subgroup_report(

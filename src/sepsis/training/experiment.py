@@ -48,8 +48,11 @@ log = get_logger("training.experiment")
 def _load_records(cfg: ExperimentConfig):
     d = cfg.data
     if d.source == "synthetic":
-        log.info("generating synthetic cohort: n=%d prevalence=%.3f",
-                 d.synthetic_n_patients, d.synthetic_prevalence)
+        log.info(
+            "generating synthetic cohort: n=%d prevalence=%.3f",
+            d.synthetic_n_patients,
+            d.synthetic_prevalence,
+        )
         return generate_cohort(d.synthetic_n_patients, d.synthetic_prevalence, d.seed)
 
     root = Path(d.root)
@@ -81,8 +84,11 @@ def _run_sequence(cfg, train_td, val_td, test_td, out_dir):
         s, _ = predict_sequence_scores(fit.model, td, dev)
         return np.concatenate(s)
 
-    extra = {"best_epoch": fit.best_epoch, "history": fit.history,
-             "n_parameters": int(sum(p.numel() for p in fit.model.parameters()))}
+    extra = {
+        "best_epoch": fit.best_epoch,
+        "history": fit.history,
+        "n_parameters": int(sum(p.numel() for p in fit.model.parameters())),
+    }
     return fit.model, val_scores, val_labels, test_scores, test_labels, score_fn, extra
 
 
@@ -119,10 +125,12 @@ def _run_gbm(cfg, train_td, val_td, test_td, out_dir):
             flat.append(sc[i, : int(td.lengths[i])])
         return np.concatenate(flat)
 
-    extra = {"gbm_best_iteration": res.best_iteration,
-             "gbm_val_auprc": res.val_auprc,
-             "top_gain_features": list(res.feature_importance.items())[:25],
-             "_tables": (tr_tab, va_tab, te_tab)}
+    extra = {
+        "gbm_best_iteration": res.best_iteration,
+        "gbm_val_auprc": res.val_auprc,
+        "top_gain_features": list(res.feature_importance.items())[:25],
+        "_tables": (tr_tab, va_tab, te_tab),
+    }
     return model, val_scores, val_labels, test_scores, test_labels, score_fn, extra
 
 
@@ -148,19 +156,24 @@ def _explain_gbm(model, extra, out_dir) -> dict:
     top_idx = [te_tab.feature_names.index(n) for n, _ in shap_summary["ranking"][:4]]
     pdp = {
         te_tab.feature_names[i]: {
-            "pdp": {k: v.tolist()
-                    for k, v in partial_dependence(_predict_matrix, te_tab.X, i).items()},
-            "ale": {k: v.tolist()
-                    for k, v in accumulated_local_effects(_predict_matrix, te_tab.X, i).items()},
+            "pdp": {
+                k: v.tolist() for k, v in partial_dependence(_predict_matrix, te_tab.X, i).items()
+            },
+            "ale": {
+                k: v.tolist()
+                for k, v in accumulated_local_effects(_predict_matrix, te_tab.X, i).items()
+            },
         }
         for i in top_idx
     }
     return {
         "method": "TreeSHAP + PDP/ALE + global surrogate tree",
         "global_ranking": [[n, v] for n, v in shap_summary["ranking"][:25]],
-        "surrogate": {"fidelity_r2": surro.fidelity_r2,
-                      "alarm_agreement": surro.alarm_agreement,
-                      "max_depth": surro.max_depth},
+        "surrogate": {
+            "fidelity_r2": surro.fidelity_r2,
+            "alarm_agreement": surro.alarm_agreement,
+            "max_depth": surro.max_depth,
+        },
         "pdp_ale": pdp,
     }
 
@@ -202,9 +215,11 @@ def _explain_sequence(model, cfg, test_td, test_scores, out_dir) -> dict:
         "method": "Integrated Gradients (grouped) + global surrogate tree",
         "global_ranking": ranking[:25],
         "mean_completeness_gap": float(np.mean(completeness)),
-        "surrogate": {"fidelity_r2": surro.fidelity_r2,
-                      "alarm_agreement": surro.alarm_agreement,
-                      "max_depth": surro.max_depth},
+        "surrogate": {
+            "fidelity_r2": surro.fidelity_r2,
+            "alarm_agreement": surro.alarm_agreement,
+            "max_depth": surro.max_depth,
+        },
     }
     if cfg.model.name == "transformer":
         from sepsis.explain.attention import temporal_attention_profile
@@ -245,8 +260,9 @@ def run_experiment(cfg: ExperimentConfig) -> dict:
     test_td = pre.transform(split.test)
 
     branch = _run_gbm if cfg.model.name == "lightgbm" else _run_sequence
-    (model, val_scores, val_labels, test_scores, test_labels,
-     score_fn, extra) = branch(cfg, train_td, val_td, test_td, out_dir)
+    (model, val_scores, val_labels, test_scores, test_labels, score_fn, extra) = branch(
+        cfg, train_td, val_td, test_td, out_dir
+    )
 
     val_s = np.concatenate(val_scores)
     val_y = np.concatenate(val_labels)
@@ -264,9 +280,7 @@ def run_experiment(cfg: ExperimentConfig) -> dict:
     F.plot_reliability(
         {
             "uncalibrated": reliability_curve(test_y, test_s, strategy="quantile"),
-            cfg.uncertainty.calibration: reliability_curve(
-                test_y, test_s_cal, strategy="quantile"
-            ),
+            cfg.uncertainty.calibration: reliability_curve(test_y, test_s_cal, strategy="quantile"),
         },
         out_dir / "figures" / "reliability.png",
     )
@@ -281,10 +295,13 @@ def run_experiment(cfg: ExperimentConfig) -> dict:
 
     # --- operating point via utility --------------------------------------
     grid = np.round(np.linspace(0.02, 0.8, 40), 4)
-    thr, util_break = best_threshold_by_utility(val_labels, [calibrator.transform(s) for s in val_scores], grid)
+    thr, util_break = best_threshold_by_utility(
+        val_labels, [calibrator.transform(s) for s in val_scores], grid
+    )
     util_curve = [
-        normalized_utility(val_labels,
-                           [(calibrator.transform(s) >= g).astype(int) for s in val_scores]).normalized
+        normalized_utility(
+            val_labels, [(calibrator.transform(s) >= g).astype(int) for s in val_scores]
+        ).normalized
         for g in grid
     ]
     F.plot_utility_threshold(grid, util_curve, thr, out_dir / "figures" / "utility_threshold.png")
@@ -292,18 +309,20 @@ def run_experiment(cfg: ExperimentConfig) -> dict:
         test_labels, [(s >= thr).astype(int) for s in test_scores_cal], threshold=thr
     )
     (out_dir / "operating_point.json").write_text(
-        json.dumps({"alarm_threshold": float(thr),
-                    "conformal_alpha": cfg.uncertainty.conformal_alpha}, indent=2)
+        json.dumps(
+            {"alarm_threshold": float(thr), "conformal_alpha": cfg.uncertainty.conformal_alpha},
+            indent=2,
+        )
     )
 
     # --- headline metrics + clustered CIs -------------------------------
-    stay_groups = np.concatenate(
-        [np.full(len(s), i) for i, s in enumerate(test_scores)]
+    stay_groups = np.concatenate([np.full(len(s), i) for i, s in enumerate(test_scores)])
+    ci_auroc = bootstrap_ci(
+        auroc, test_y, test_s_cal, stay_groups, n_resamples=500, seed=cfg.train.seed
     )
-    ci_auroc = bootstrap_ci(auroc, test_y, test_s_cal, stay_groups, n_resamples=500,
-                            seed=cfg.train.seed)
-    ci_auprc = bootstrap_ci(auprc, test_y, test_s_cal, stay_groups, n_resamples=500,
-                            seed=cfg.train.seed)
+    ci_auprc = bootstrap_ci(
+        auprc, test_y, test_s_cal, stay_groups, n_resamples=500, seed=cfg.train.seed
+    )
     summary = classification_summary(test_y, test_s_cal, threshold=thr)
 
     dc = decision_curve(test_y, test_s_cal)
@@ -336,7 +355,10 @@ def run_experiment(cfg: ExperimentConfig) -> dict:
     n = int(test_td.lengths[septic_idx])
     onset = next((t for t in range(n) if test_td.y[septic_idx, t] > 0), None)
     F.plot_risk_trajectory(
-        np.arange(n), test_scores_cal[septic_idx], onset, thr,
+        np.arange(n),
+        test_scores_cal[septic_idx],
+        onset,
+        thr,
         out_dir / "figures" / "example_trajectory.png",
     )
 
@@ -369,7 +391,11 @@ def run_experiment(cfg: ExperimentConfig) -> dict:
     (out_dir / "results.json").write_text(json.dumps(results, indent=2, default=float))
     log.info(
         "DONE in %.1fs | test AUROC %s | AUPRC %s | utility %.3f | ECE %.3f->%.3f",
-        results["runtime_seconds"], str(ci_auroc), str(ci_auprc),
-        test_util.normalized, ece_raw["ece"], ece_cal["ece"],
+        results["runtime_seconds"],
+        str(ci_auroc),
+        str(ci_auprc),
+        test_util.normalized,
+        ece_raw["ece"],
+        ece_cal["ece"],
     )
     return results

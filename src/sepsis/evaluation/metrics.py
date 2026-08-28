@@ -89,5 +89,8 @@ def classification_summary(
         "sensitivity_at_spec85": float(sens),
         "specificity_at_sens85": float(spec),
         "threshold_at_spec85": float(thr85),
-        "tp": tp, "fp": fp, "fn": fn, "tn": tn,
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "tn": tn,
     }

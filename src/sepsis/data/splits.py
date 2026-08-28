@@ -41,8 +41,10 @@ class GroupSplit:
                 "positive_hour_rate": round(pos_hrs / max(hrs, 1), 5),
             }
 
-        return {k: _stat(v) for k, v in
-                {"train": self.train, "val": self.val, "test": self.test}.items()}
+        return {
+            k: _stat(v)
+            for k, v in {"train": self.train, "val": self.val, "test": self.test}.items()
+        }
 
 
 def _stratified_indices(
@@ -57,8 +59,8 @@ def _stratified_indices(
         n_tr = int(round(f_tr * n))
         n_va = int(round(f_va * n))
         train_idx.append(idx[:n_tr])
-        val_idx.append(idx[n_tr:n_tr + n_va])
-        test_idx.append(idx[n_tr + n_va:])
+        val_idx.append(idx[n_tr : n_tr + n_va])
+        test_idx.append(idx[n_tr + n_va :])
     return (
         np.concatenate(train_idx),
         np.concatenate(val_idx),
@@ -82,9 +84,7 @@ def make_splits(
         if dev and ext:
             labels = np.array([r.is_septic for r in dev], dtype=int)
             rel_val = val_fraction / (1.0 - test_fraction)
-            tr, va, _ = _stratified_indices(
-                labels, (1.0 - rel_val, rel_val, 0.0), rng
-            )
+            tr, va, _ = _stratified_indices(labels, (1.0 - rel_val, rel_val, 0.0), rng)
             return GroupSplit(
                 train=[dev[i] for i in tr],
                 val=[dev[i] for i in va],

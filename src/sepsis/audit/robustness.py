@@ -93,13 +93,9 @@ def missingness_stress_test(
                             if not seen_any:
                                 last = col_val[t]  # keep the train-mean backfill
                         seq[t, j] = last
-                        seq[t, delta_sl.start + j] = np.log1p(since) / max(
-                            np.log1p(n), 1e-6
-                        )
+                        seq[t, delta_sl.start + j] = np.log1p(since) / max(np.log1p(n), 1e-6)
                     seq[:, mask_sl.start + j] = col_obs.astype(np.float32)
                 pert.X[i, :n] = seq
         s = score_fn(pert)
-        rows.append(
-            {"extra_missing_frac": float(frac), "auroc": auroc(y, s), "auprc": auprc(y, s)}
-        )
+        rows.append({"extra_missing_frac": float(frac), "auroc": auroc(y, s), "auprc": auprc(y, s)})
     return rows
