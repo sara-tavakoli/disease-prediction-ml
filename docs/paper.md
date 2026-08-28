@@ -104,17 +104,18 @@ rollout summarised as a look-back profile.
 
 ## 8. Results
 
-Synthetic sanity benchmark (5 000 stays, 8 % prevalence, 25 epochs,
-seed 20190804), produced by `scripts/reproduce_all.sh synthetic`:
+Real PhysioNet/CinC-2019 corpus — 40 336 ICU stays (`training_setA` Beth Israel +
+`training_setB` Emory), ~7.3 % positive hours, early stopping on validation AUPRC,
+seed 20190804, Kaggle P100. Patient-clustered bootstrap 95 % CIs.
 
 <!-- RESULTS:START -->
 | model | AUROC (95% CI) | AUPRC (95% CI) | utility | sens@spec85 | ECE (raw → cal) | conf. cov. (α=0.1) | params |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| lightgbm | 0.998 [0.996, 0.999] | 0.989 [0.984, 0.994] | 0.873 | 0.993 | 0.001 → 0.001 | 0.997 | — |
-| lstm | 0.998 [0.997, 0.999] | 0.989 [0.983, 0.993] | 0.877 | 0.995 | 0.127 → 0.001 | 0.997 | 255105 |
-| gru | 0.998 [0.997, 0.999] | 0.992 [0.986, 0.995] | 0.886 | 0.997 | 0.111 → 0.001 | 0.997 | 191361 |
-| tcn | 0.998 [0.996, 0.999] | 0.992 [0.987, 0.995] | 0.889 | 0.994 | 0.086 → 0.001 | 0.998 | 501505 |
-| transformer | 0.998 [0.996, 0.999] | 0.991 [0.986, 0.995] | 0.894 | 0.997 | 0.081 → 0.001 | 0.997 | 609153 |
+| lightgbm | 0.814 [0.789, 0.835] | 0.104 [0.087, 0.124] | 0.401 | 0.538 | 0.213 → 0.002 | 0.899 | — |
+| lstm | 0.783 [0.759, 0.805] | 0.085 [0.073, 0.104] | 0.325 | 0.473 | 0.457 → 0.004 | 0.914 | 255105 |
+| gru | 0.809 [0.786, 0.829] | 0.106 [0.093, 0.127] | 0.375 | 0.544 | 0.392 → 0.002 | 0.920 | 191361 |
+| tcn | 0.806 [0.779, 0.828] | 0.112 [0.094, 0.138] | 0.398 | 0.566 | 0.345 → 0.001 | 0.902 | 501505 |
+| transformer | 0.816 [0.795, 0.836] | 0.114 [0.097, 0.138] | 0.412 | 0.601 | 0.348 → 0.002 | 0.909 | 609153 |
 <!-- RESULTS:END -->
 
 Observations to expect and report on the real corpus:
