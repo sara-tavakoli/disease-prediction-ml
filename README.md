@@ -73,7 +73,13 @@ the **real** PhysioNet corpus require `sepsis download --full`; fill the model
 card from `artifacts/<run>/results.json`.
 
 <!-- RESULTS:START -->
-_Run `bash scripts/reproduce_all.sh` to populate this table._
+| model | AUROC (95% CI) | AUPRC (95% CI) | utility | sens@spec85 | ECE (raw → cal) | conf. cov. (α=0.1) | params |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| lightgbm | 0.998 [0.996, 0.999] | 0.989 [0.984, 0.994] | 0.873 | 0.993 | 0.001 → 0.001 | 0.997 | — |
+| lstm | 0.998 [0.997, 0.999] | 0.989 [0.983, 0.993] | 0.877 | 0.995 | 0.127 → 0.001 | 0.997 | 255105 |
+| gru | 0.998 [0.997, 0.999] | 0.992 [0.986, 0.995] | 0.886 | 0.997 | 0.111 → 0.001 | 0.997 | 191361 |
+| tcn | 0.998 [0.996, 0.999] | 0.992 [0.987, 0.995] | 0.889 | 0.994 | 0.086 → 0.001 | 0.998 | 501505 |
+| transformer | 0.998 [0.996, 0.999] | 0.991 [0.986, 0.995] | 0.894 | 0.997 | 0.081 → 0.001 | 0.997 | 609153 |
 <!-- RESULTS:END -->
 
 Representative figures (`artifacts/<run>/figures/`):
