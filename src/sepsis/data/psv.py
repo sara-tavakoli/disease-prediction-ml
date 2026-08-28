@@ -52,12 +52,12 @@ class PatientRecord:
 
 def load_psv(path: str | Path, source: str = "unknown") -> PatientRecord:
     path = Path(path)
-    df = pd.read_csv(path, sep="|")
-    missing = [c for c in CHANNELS + [LABEL_COL] if c not in df.columns]
+    raw = pd.read_csv(path, sep="|")
+    missing = [c for c in CHANNELS + [LABEL_COL] if c not in raw.columns]
     if missing:
         raise ValueError(f"{path.name}: missing expected columns {missing}")
-    label = df[LABEL_COL].fillna(0).to_numpy(dtype=np.int8)
-    frame = df[CHANNELS].reset_index(drop=True).astype(np.float32)
+    label = raw[LABEL_COL].fillna(0).to_numpy(dtype=np.int8)
+    frame = raw[CHANNELS].reset_index(drop=True).astype(np.float32)
     return PatientRecord(pid=path.stem, frame=frame, label=label, source=source)
 
 

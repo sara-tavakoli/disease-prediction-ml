@@ -245,6 +245,6 @@ def write_cohort(records: list[PatientRecord], out_dir: str) -> None:
     sub = Path(out_dir) / "training_setSYN"
     sub.mkdir(parents=True, exist_ok=True)
     for rec in records:
-        df = rec.frame.copy()
-        df[LABEL_COL] = rec.label
-        df.to_csv(sub / f"{rec.pid}.psv", sep="|", index=False, na_rep="NaN", float_format="%.4g")
+        out = rec.frame.copy()
+        out[LABEL_COL] = rec.label
+        out.to_csv(sub / f"{rec.pid}.psv", sep="|", index=False, na_rep="NaN", float_format="%.4g")
