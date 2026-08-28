@@ -10,7 +10,7 @@
 > hour, from irregular and mostly-missing vital signs and labs
 > ([PhysioNet/CinC Challenge 2019](https://physionet.org/content/challenge-2019/1.0.0/)).
 
-This is not a single model — it is a **research-grade pipeline**:
+This is not a single model it is a **research-grade pipeline**:
 
 * four **causal** deep sequence encoders (LSTM · GRU · Temporal CNN · Transformer)
   plus a gradient-boosting baseline, all trained with an imbalance-aware focal
@@ -23,7 +23,7 @@ This is not a single model — it is a **research-grade pipeline**:
 * a **fairness audit** (subgroup AUROC / TPR / alarm-rate / calibration gaps for
   sex, age band, ICU unit) and a **robustness audit** (Gaussian sensor noise and
   extra-missingness stress curves; cross-institution external test);
-* **explainability** — TreeSHAP, Integrated Gradients (with completeness check),
+* **explainability** : TreeSHAP, Integrated Gradients (with completeness check),
   PDP/ALE, a global surrogate tree, and Transformer attention rollout;
 * patient-**clustered bootstrap** confidence intervals and **decision-curve
   analysis**;
