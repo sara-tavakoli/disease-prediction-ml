@@ -48,7 +48,7 @@ source .venv/bin/activate
 # 1) smoke run on the built-in synthetic cohort (no download), ~30 s
 sepsis train --config configs/base.yaml configs/smoke.yaml configs/model_transformer.yaml
 
-# 2) real data — a 240-stay sample ships in the repo; get the full ~40k corpus with:
+# 2) real data  a 240-stay sample ships in the repo; get the full ~40k corpus with:
 sepsis download --full          # ~2.6 GB into data/raw/
 sepsis train --config configs/base.yaml configs/model_transformer.yaml \
              configs/data_physionet.yaml
