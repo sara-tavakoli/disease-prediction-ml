@@ -153,6 +153,11 @@ bash scripts/reproduce_all.sh physionet    # after `sepsis download --full`
 docker compose up        # API on :8000  + MLflow UI on :5000
 ```
 
+**Free GPU:** [`notebooks/kaggle_train.ipynb`](notebooks/kaggle_train.ipynb) clones
+the repo, mounts a hosted PhysioNet CinC-2019 dataset, and trains all five models
+on the real corpus (cross-hospital external test) on a Kaggle P100, then
+regenerates the leaderboard tables. Enable **GPU + Internet** and *Run All*.
+
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for ideas (learned imputation, adaptive
 conformal, a MIMIC-IV loader, group-DRO).
 
